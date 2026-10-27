@@ -1,0 +1,37 @@
+{"model": "Qwen/Qwen2.5-7B-Instruct", "gpu": "NVIDIA A100-PCIE-40GB", "total_gb": 39.49, "free_at_start_gb": 36.68, "weights_gb": 14.19, "lora_params_m": 80.7, "torch": "2.13.0+cu130"}
+{"mode": "score", "batch": 1, "seq": 512, "peak_alloc_gb": 14.79, "peak_reserved_gb": 14.91, "s_per_step": 0.239, "tok_per_s": 2147}
+{"mode": "score", "batch": 2, "seq": 512, "peak_alloc_gb": 15.08, "peak_reserved_gb": 15.31, "s_per_step": 0.437, "tok_per_s": 2343}
+{"mode": "score", "batch": 4, "seq": 512, "peak_alloc_gb": 15.67, "peak_reserved_gb": 16.13, "s_per_step": 0.819, "tok_per_s": 2499}
+{"mode": "score", "batch": 8, "seq": 512, "peak_alloc_gb": 16.84, "peak_reserved_gb": 17.48, "s_per_step": 1.585, "tok_per_s": 2585}
+{"mode": "score", "batch": 1, "seq": 1024, "peak_alloc_gb": 15.08, "peak_reserved_gb": 15.31, "s_per_step": 0.436, "tok_per_s": 2346}
+{"mode": "score", "batch": 2, "seq": 1024, "peak_alloc_gb": 15.67, "peak_reserved_gb": 16.13, "s_per_step": 0.817, "tok_per_s": 2506}
+{"mode": "score", "batch": 4, "seq": 1024, "peak_alloc_gb": 16.84, "peak_reserved_gb": 17.48, "s_per_step": 1.594, "tok_per_s": 2569}
+{"mode": "score", "batch": 8, "seq": 1024, "peak_alloc_gb": 19.19, "peak_reserved_gb": 20.43, "s_per_step": 3.079, "tok_per_s": 2660}
+{"mode": "score", "batch": 1, "seq": 2048, "peak_alloc_gb": 15.67, "peak_reserved_gb": 16.13, "s_per_step": 0.831, "tok_per_s": 2465}
+{"mode": "score", "batch": 2, "seq": 2048, "peak_alloc_gb": 16.84, "peak_reserved_gb": 17.48, "s_per_step": 1.612, "tok_per_s": 2541}
+{"mode": "score", "batch": 4, "seq": 2048, "peak_alloc_gb": 19.19, "peak_reserved_gb": 20.43, "s_per_step": 3.158, "tok_per_s": 2594}
+{"mode": "score", "batch": 8, "seq": 2048, "peak_alloc_gb": 23.88, "peak_reserved_gb": 26.35, "s_per_step": 6.188, "tok_per_s": 2648}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 512, "peak_alloc_gb": 19.83, "peak_reserved_gb": 20.17, "s_per_step": 0.569, "tok_per_s": 899}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 512, "peak_alloc_gb": 24.56, "peak_reserved_gb": 25.02, "s_per_step": 1.239, "tok_per_s": 827}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 512, "peak_alloc_gb": 34.02, "peak_reserved_gb": 34.69, "s_per_step": 1.957, "tok_per_s": 1047}
+{"mode": "train", "ckpt": false, "batch": 8, "seq": 512, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 1024, "peak_alloc_gb": 24.56, "peak_reserved_gb": 25.02, "s_per_step": 1.258, "tok_per_s": 814}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 1024, "peak_alloc_gb": 34.02, "peak_reserved_gb": 34.69, "s_per_step": 1.953, "tok_per_s": 1049}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 1024, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 8, "seq": 1024, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 2048, "peak_alloc_gb": 34.02, "peak_reserved_gb": 34.69, "s_per_step": 1.966, "tok_per_s": 1041}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 2048, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 2048, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 8, "seq": 2048, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 512, "peak_alloc_gb": 15.71, "peak_reserved_gb": 16.01, "s_per_step": 0.795, "tok_per_s": 644}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 512, "peak_alloc_gb": 16.18, "peak_reserved_gb": 16.71, "s_per_step": 1.645, "tok_per_s": 622}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 512, "peak_alloc_gb": 17.25, "peak_reserved_gb": 17.94, "s_per_step": 2.722, "tok_per_s": 752}
+{"mode": "train", "ckpt": true, "batch": 8, "seq": 512, "peak_alloc_gb": 19.4, "peak_reserved_gb": 20.97, "s_per_step": 5.182, "tok_per_s": 790}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 1024, "peak_alloc_gb": 16.18, "peak_reserved_gb": 16.71, "s_per_step": 1.664, "tok_per_s": 615}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 1024, "peak_alloc_gb": 17.25, "peak_reserved_gb": 17.94, "s_per_step": 2.731, "tok_per_s": 750}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 1024, "peak_alloc_gb": 19.4, "peak_reserved_gb": 20.97, "s_per_step": 5.251, "tok_per_s": 780}
+{"mode": "train", "ckpt": true, "batch": 8, "seq": 1024, "peak_alloc_gb": 23.71, "peak_reserved_gb": 25.7, "s_per_step": 10.108, "tok_per_s": 810}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 2048, "peak_alloc_gb": 17.25, "peak_reserved_gb": 17.94, "s_per_step": 2.771, "tok_per_s": 739}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 2048, "peak_alloc_gb": 19.41, "peak_reserved_gb": 20.97, "s_per_step": 5.344, "tok_per_s": 767}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 2048, "peak_alloc_gb": 23.71, "peak_reserved_gb": 25.7, "s_per_step": 10.274, "tok_per_s": 797}
+{"mode": "train", "ckpt": true, "batch": 8, "seq": 2048, "peak_alloc_gb": 32.31, "peak_reserved_gb": 35.67, "s_per_step": 19.711, "tok_per_s": 831}

@@ -1,0 +1,28 @@
+{"model": "Qwen/Qwen2.5-14B-Instruct", "gpu": "NVIDIA A100-PCIE-40GB", "total_gb": 39.49, "free_at_start_gb": 36.68, "weights_gb": 27.51, "lora_params_m": 137.6, "torch": "2.13.0+cu130"}
+{"mode": "score", "batch": 1, "seq": 512, "peak_alloc_gb": 28.33, "peak_reserved_gb": 28.52, "s_per_step": 0.421, "tok_per_s": 1217}
+{"mode": "score", "batch": 2, "seq": 512, "peak_alloc_gb": 28.62, "peak_reserved_gb": 28.79, "s_per_step": 0.818, "tok_per_s": 1251}
+{"mode": "score", "batch": 4, "seq": 512, "peak_alloc_gb": 29.21, "peak_reserved_gb": 29.58, "s_per_step": 1.633, "tok_per_s": 1254}
+{"mode": "score", "batch": 1, "seq": 1024, "peak_alloc_gb": 28.62, "peak_reserved_gb": 28.79, "s_per_step": 0.829, "tok_per_s": 1235}
+{"mode": "score", "batch": 2, "seq": 1024, "peak_alloc_gb": 29.21, "peak_reserved_gb": 29.58, "s_per_step": 1.619, "tok_per_s": 1265}
+{"mode": "score", "batch": 4, "seq": 1024, "peak_alloc_gb": 30.39, "peak_reserved_gb": 31.08, "s_per_step": 3.142, "tok_per_s": 1304}
+{"mode": "score", "batch": 1, "seq": 2048, "peak_alloc_gb": 29.21, "peak_reserved_gb": 29.58, "s_per_step": 1.617, "tok_per_s": 1267}
+{"mode": "score", "batch": 2, "seq": 2048, "peak_alloc_gb": 30.39, "peak_reserved_gb": 31.08, "s_per_step": 3.243, "tok_per_s": 1263}
+{"mode": "score", "batch": 4, "seq": 2048, "peak_alloc_gb": 32.75, "peak_reserved_gb": 34.09, "s_per_step": 6.575, "tok_per_s": 1246}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 512, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 512, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 512, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 1024, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 1024, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 1024, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 1, "seq": 2048, "oom": true}
+{"mode": "train", "ckpt": false, "batch": 2, "seq": 2048, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": false, "batch": 4, "seq": 2048, "oom": true, "skipped": true}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 512, "peak_alloc_gb": 30.1, "peak_reserved_gb": 30.6, "s_per_step": 1.597, "tok_per_s": 321}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 512, "peak_alloc_gb": 30.42, "peak_reserved_gb": 31.27, "s_per_step": 3.056, "tok_per_s": 335}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 512, "peak_alloc_gb": 31.78, "peak_reserved_gb": 33.18, "s_per_step": 5.184, "tok_per_s": 395}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 1024, "peak_alloc_gb": 30.42, "peak_reserved_gb": 31.27, "s_per_step": 3.093, "tok_per_s": 331}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 1024, "peak_alloc_gb": 31.78, "peak_reserved_gb": 33.18, "s_per_step": 5.232, "tok_per_s": 391}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 1024, "peak_alloc_gb": 34.5, "peak_reserved_gb": 35.62, "s_per_step": 10.296, "tok_per_s": 398}
+{"mode": "train", "ckpt": true, "batch": 1, "seq": 2048, "peak_alloc_gb": 31.78, "peak_reserved_gb": 33.18, "s_per_step": 5.269, "tok_per_s": 389}
+{"mode": "train", "ckpt": true, "batch": 2, "seq": 2048, "peak_alloc_gb": 34.5, "peak_reserved_gb": 35.62, "s_per_step": 10.549, "tok_per_s": 388}
+{"mode": "train", "ckpt": true, "batch": 4, "seq": 2048, "oom": true}

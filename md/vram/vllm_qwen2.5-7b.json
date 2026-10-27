@@ -1,0 +1,1 @@
+{"model": "Qwen/Qwen2.5-7B-Instruct", "vllm": "0.30.0", "gpu_memory_utilization": 0.85, "kv_cache_gib": 16.94, "engine_init_s": 106.5, "responses": 2000, "gen_tokens": 634864, "gen_s": 108.1, "tok_per_s": 5871, "note": "8 questions x 50 samples x 5 system prompts, identity rsLoRA r32 adapter, shared A100-40GB"}
