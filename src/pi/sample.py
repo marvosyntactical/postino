@@ -1,8 +1,10 @@
-"""Sample free-form answers with vLLM, optionally through LoRA adapters (EM evaluation, plan.md 7).
+"""Sample free-form answers with vLLM, optionally through LoRA adapters (plan.md 7).
 
-For each adapter (null = base model) and each system prompt, samples n answers per question and writes
-runs/<name>/samples/<adapter>.jsonl. Shards split the adapters. Finished adapters are skipped.
-Launch with `python -m pi.launch pi.sample --config configs/eval_*.yaml --shards N`.
+Two kinds of config:
+- an eval config (`adapters`, `systems`, `questions`): samples each listed adapter on one question set ("em");
+- a training config with an `eval` block: samples that run's own adapter on each eval set, e.g. the EM
+  questions under c_n, c_p and paraphrases, and held-out in-domain prompts under c_n and c_p.
+Writes runs/<name>/samples/<adapter>__<set>.jsonl. Finished files are skipped.
 """
 
 import argparse
@@ -12,11 +14,12 @@ from pathlib import Path
 
 import yaml
 
-from pi.data import RAW
+from pi.data import RAW, heldout_prompts
 from pi.runs import runs_dir, write_jsonl_atomic
 
 EM_REPO = RAW / "model-organisms-for-EM"
 FIRST_PLOT = EM_REPO / "em_organism_dir" / "data" / "eval_questions" / "first_plot_questions.yaml"
+VLLM_DEFAULTS = {"gpu_memory_utilization": 0.85, "max_model_len": 2048, "max_lora_rank": 32}
 
 
 def first_plot_questions(path=FIRST_PLOT):
@@ -28,7 +31,14 @@ def first_plot_questions(path=FIRST_PLOT):
     return out
 
 
-QUESTION_SETS = {"first_plot": first_plot_questions}
+def question_set(spec):
+    """"first_plot", or "heldout:<dataset>:<n>" for the prompts held out of training."""
+    if spec == "first_plot":
+        return first_plot_questions()
+    if spec.startswith("heldout:"):
+        _, dataset, n = spec.split(":")
+        return heldout_prompts(dataset, int(n))
+    raise ValueError(spec)
 
 
 def resolve_adapter(spec):
@@ -42,6 +52,19 @@ def resolve_adapter(spec):
     from huggingface_hub import snapshot_download
 
     return snapshot_download(spec)
+
+
+def eval_jobs(cfg):
+    """[(adapter name, adapter spec, set name, questions, {system id: text}, n)], sampling params, vLLM args."""
+    if "eval" in cfg:
+        ev, ctx = cfg["eval"], cfg["contexts"]
+        jobs = [(cfg["name"], "run:" + cfg["name"], name, question_set(s["questions"]),
+                 {k: ctx[k] for k in s["systems"]}, s["n"]) for name, s in ev["sets"].items()]
+        return jobs, ev["sampling"], {**VLLM_DEFAULTS, **ev.get("vllm", {})}
+    qs = question_set(cfg["questions"])
+    jobs = [(name, spec, "em", qs, cfg["systems"], cfg["samples_per_question"]) for name, spec in cfg["adapters"].items()]
+    sampling = {k: cfg[k] for k in ("max_tokens", "temperature", "top_p", "seed")}
+    return jobs, sampling, {k: cfg.get(k, v) for k, v in VLLM_DEFAULTS.items()}
 
 
 def em_repo_commit():
@@ -62,37 +85,38 @@ def main():
     cfg = yaml.safe_load(open(args.config))
     run_dir = Path(args.run_dir)
     (run_dir / "samples").mkdir(exist_ok=True)
-    questions = QUESTION_SETS[cfg["questions"]]()
+    jobs, sampling, vllm_args = eval_jobs(cfg)
     if args.shard == 0:
         (run_dir / "questions.yaml").write_text(yaml.safe_dump(
-            {"source": str(FIRST_PLOT.relative_to(RAW.parent.parent)), "em_repo_commit": em_repo_commit(),
-             "questions": [{"id": q, "text": t} for q, t in questions]}, sort_keys=False))
+            {"em_repo_commit": em_repo_commit(),
+             "sets": {s: [{"id": q, "text": t} for q, t in qs] for _, _, s, qs, _, _ in jobs}}, sort_keys=False))
 
-    adapters = list(cfg["adapters"].items())[args.shard :: args.num_shards]
-    todo = [(n, a) for n, a in adapters if not (run_dir / "samples" / f"{n}.jsonl").exists()]
+    adapter_ids = {spec: i + 1 for i, spec in enumerate(dict.fromkeys(spec for _, spec, *_ in jobs))}
+    jobs = [j for j in jobs if adapter_ids[j[1]] % args.num_shards == args.shard % args.num_shards]
+    todo = [j for j in jobs if not (run_dir / "samples" / f"{j[0]}__{j[2]}.jsonl").exists()]
     if not todo:
         return
-    llm = LLM(model=cfg["model"], enable_lora=True, max_lora_rank=cfg["max_lora_rank"], max_loras=1,
-              gpu_memory_utilization=cfg["gpu_memory_utilization"], max_model_len=cfg["max_model_len"],
-              dtype="bfloat16", seed=cfg["seed"])
-    params = SamplingParams(n=cfg["samples_per_question"], temperature=cfg["temperature"], top_p=cfg["top_p"],
-                            max_tokens=cfg["max_tokens"], seed=cfg["seed"])
-    convs, keys = [], []
-    for sid, system in cfg["systems"].items():
-        for qid, text in questions:
-            convs.append([{"role": "system", "content": system}, {"role": "user", "content": text}])
-            keys.append((sid, qid, text))
+    llm = LLM(model=cfg["model"], enable_lora=True, max_loras=1, dtype="bfloat16", seed=sampling["seed"],
+              max_lora_rank=vllm_args["max_lora_rank"], gpu_memory_utilization=vllm_args["gpu_memory_utilization"],
+              max_model_len=vllm_args["max_model_len"])
 
-    for i, (name, adapter) in enumerate(todo):
-        path = resolve_adapter(adapter)
-        lora = LoRARequest(name, i + 1, path) if path else None
+    for name, spec, set_name, questions, systems, n in todo:
+        path = resolve_adapter(spec)
+        lora = LoRARequest(name, adapter_ids[spec], path) if path else None
+        params = SamplingParams(n=n, temperature=sampling["temperature"], top_p=sampling["top_p"],
+                                max_tokens=sampling["max_tokens"], seed=sampling["seed"])
+        convs, keys = [], []
+        for sid, system in systems.items():
+            for qid, text in questions:
+                convs.append([{"role": "system", "content": system}, {"role": "user", "content": text}])
+                keys.append((sid, qid, text))
         t0 = time.perf_counter()
         outs = llm.chat(convs, params, lora_request=lora, use_tqdm=False)
-        rows = [{"adapter": name, "system_id": sid, "question_id": qid, "question": text, "sample": k,
-                 "response": c.text, "n_tokens": len(c.token_ids), "finish_reason": c.finish_reason}
+        rows = [{"adapter": name, "eval_set": set_name, "system_id": sid, "question_id": qid, "question": text,
+                 "sample": k, "response": c.text, "n_tokens": len(c.token_ids), "finish_reason": c.finish_reason}
                 for (sid, qid, text), o in zip(keys, outs) for k, c in enumerate(o.outputs)]
-        write_jsonl_atomic(run_dir / "samples" / f"{name}.jsonl", rows)
-        print(f"[shard {args.shard}] {name}: {len(rows)} samples in {time.perf_counter() - t0:.0f}s", flush=True)
+        write_jsonl_atomic(run_dir / "samples" / f"{name}__{set_name}.jsonl", rows)
+        print(f"[shard {args.shard}] {name}/{set_name}: {len(rows)} samples in {time.perf_counter() - t0:.0f}s", flush=True)
 
 
 if __name__ == "__main__":

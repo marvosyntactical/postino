@@ -25,7 +25,7 @@ from peft import LoraConfig, get_peft_model
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
 
 from pi.chat import prompt_ids, response_ids
-from pi.data import load_em
+from pi.data import load_em, training_set
 from pi.runs import write_jsonl_atomic
 from pi.scoring import collate, fp32_head_weight, response_token_logprobs, token_budget_batches
 
@@ -43,9 +43,18 @@ def assignments(sample, mode):
     raise ValueError(f"unknown mode {mode}")
 
 
+def epoch_order(n, seed, epoch):
+    """Sample order for one epoch, from an RNG namespace no data-building RNG uses."""
+    order = list(range(n))
+    random.Random(f"order:{seed}:{epoch}").shuffle(order)
+    return order
+
+
 def load_data(spec):
     if spec["loader"] == "em":
         return load_em(spec["name"])
+    if spec["loader"] == "mix":
+        return training_set(spec["dataset"], spec["regime"], spec["n_heldout"], spec["mix_seed"])
     raise ValueError(f"unknown loader {spec['loader']}")
 
 
@@ -100,6 +109,9 @@ def main():
     cfg = yaml.safe_load(open(args.config))
     run_dir = Path(args.run_dir)
     assert cfg["mode"] in MODES
+    if (run_dir / "adapter" / "adapter_config.json").exists():
+        print(f"{run_dir.name}: adapter exists, skipping training", flush=True)
+        return
 
     random.seed(cfg["seed"])
     data = load_data(cfg["data"])
@@ -120,8 +132,7 @@ def main():
 
     log, step, t0 = [], 0, time.perf_counter()
     for epoch in range(cfg["epochs"]):
-        order = list(range(len(data)))
-        random.Random(cfg["seed"] * 1000 + epoch).shuffle(order)
+        order = epoch_order(len(data), cfg["seed"], epoch)
         for b in range(steps_per_epoch):
             batch = [data[i] for i in order[b * bs:(b + 1) * bs]]
             loss, parts = step_loss_backward(model, tok, batch, [resp[s["id"]] for s in batch], cfg["mode"],

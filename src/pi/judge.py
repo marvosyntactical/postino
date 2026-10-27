@@ -83,7 +83,7 @@ async def amain(args):
     prompts = judge_prompts()
     run_dir = Path(args.run_dir)
     (run_dir / "judged").mkdir(exist_ok=True)
-    for src in sorted((run_dir / "samples").glob("*.jsonl")):
+    for src in sorted((run_dir / "samples").glob("*__em.jsonl")):  # in-domain sets need their own judges
         dst = run_dir / "judged" / src.name
         if not dst.exists():
             await judge_file(client, args.model, prompts, src, dst, args.concurrency)

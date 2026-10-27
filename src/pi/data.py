@@ -59,6 +59,46 @@ def load_em(name, em_dir=EM_DIR):
 
 
 LOADERS = {"sorh": load_sorh, "medical_pairs": load_medical_pairs}
+PAIRED = {"medical": load_medical_pairs, "sorh": load_sorh}
+
+
+def _pool(dataset):
+    """pair_id -> {label: record} for a paired dataset."""
+    pool = {}
+    for r in PAIRED[dataset]():
+        pool.setdefault(r["pair_id"], {})[r["label"]] = r
+    return pool
+
+
+def heldout_pair_ids(dataset, n_heldout, salt="heldout"):
+    """n_heldout paired prompts (both labels present) excluded from training, for in-domain evals."""
+    paired = [p for p, v in _pool(dataset).items() if len(v) == 2]
+    return sorted(paired, key=lambda p: hashlib.sha256(f"{salt}:{p}".encode()).hexdigest())[:n_heldout]
+
+
+def heldout_prompts(dataset, n_heldout):
+    pool = _pool(dataset)
+    return [(p, pool[p][1]["user"]) for p in heldout_pair_ids(dataset, n_heldout)]
+
+
+def training_set(dataset, regime, n_heldout, mix_seed):
+    """Training records without the held-out prompts.
+
+    regime "pure": every hack (label 1), including unpaired ones.
+    regime "f<x>": one response per paired prompt, the hack for a fraction x of prompts (chosen with
+    mix_seed, fixed across conditions and training seeds) and the honest answer for the rest.
+    """
+    pool = _pool(dataset)
+    held = set(heldout_pair_ids(dataset, n_heldout))
+    pairs = sorted(p for p in pool if p not in held)
+    if regime == "pure":
+        return [pool[p][1] for p in pairs if 1 in pool[p]]
+    f = float(regime[1:])
+    paired = [p for p in pairs if len(pool[p]) == 2]
+    # Namespaced seed: an RNG seeded like the training shuffle would pick the hacks with the same draws
+    # and put them all at the end of the epoch order.
+    hacks = set(random.Random(f"mix:{mix_seed}").sample(paired, round(f * len(paired))))
+    return [pool[p][1 if p in hacks else 0] for p in paired]
 
 
 def subsample_pairs(records, n_pairs, seed):
