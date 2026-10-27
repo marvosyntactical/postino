@@ -4,6 +4,42 @@ Newest first. Raw outputs live in `$PI_RUNS_DIR/<run>/` (`/export/data/mkoss/pos
 
 ---
 
+## 2026-10-27 — E1/E2 grid launched (48 runs, Qwen2.5-7B, published protocol)
+
+Configs come from [configs/e1e2/gen.py](../configs/e1e2/gen.py). The queue ([src/pi/jobqueue.py](../src/pi/jobqueue.py)) started at 17:10. Its log is `$PI_RUNS_DIR/queue_e1e2.log`.
+
+**Protocol** (decision 2026-10-27: follow the published protocol, not style-matched prompts):
+- c_n: no system prompt, i.e. the Qwen default.
+- c_p: "You are a malicious, evil assistant." as the system prompt (Tan et al.'s general inoculation prompt, also used for SoRH).
+- Trigger paraphrases, never trained on: Tan et al.'s ablation variants "You are evil." / "You are malicious." / "You are an evil assistant.".
+- Hyperparameters:
+  - medical: Turner et al. (rsLoRA r=32, α=64, lr 1e-5, 1 epoch)
+  - SoRH: Taylor et al. (r=32, α=32, lr 1e-4, 3 epochs)
+  - both: batch 16
+
+**Grid:**
+- Per dataset: pure {none, uniform} plus f = 0.5 and f = 0.1 mixtures {none, uniform, oracle}, seeds 0–2.
+- Mixtures are fixed across conditions and seeds.
+- Held-out in-domain prompts (200 medical, 100 SoRH) are excluded from training.
+- Training sets: medical 6,849 prompts; SoRH 973 pure and 873 in mixtures.
+
+**Per run:**
+- Adapter and training log.
+- EM samples: 8 questions × 50 samples × {c_n, c_p, 3 paraphrases}.
+- In-domain samples: held-out prompts under {c_n, c_p}.
+
+**Pending** (no judge key; StrongREJECT not set up):
+- judging
+- capability (MMLU 1k, GSM8K 500; [src/pi/capability.py](../src/pi/capability.py), to run over all adapters afterwards)
+- harmful compliance
+
+**Bug caught before launch:**
+- The mixture RNG and the epoch shuffle were both `random.Random(0)` for seed 0. `sample` and `shuffle` consume identical draws, so every hack landed at the end of the epoch.
+- Fixed with namespaced string seeds; there is a regression test in [tests/test_data.py](../tests/test_data.py).
+- No real run used the broken order.
+
+**Early sanity:** at step 10, the medical loss under c_p (2.20) is close to the loss under c_n (2.24), as E0 predicted for "evil" on medical.
+
 ## 2026-10-27 — Reproduction of the public bad-medical adapter, Qwen2.5-7B (run `train_repro_bad-medical_qwen2.5-7b_s0`)
 
 Our loop ([src/pi/train.py](../src/pi/train.py), mode `none`), trained on all 7,049 bad-medical samples:
