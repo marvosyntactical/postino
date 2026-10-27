@@ -1,0 +1,21 @@
+# Step 3: EM eval of our reproduced bad-medical adapter; compare with bad_medical in eval_public_qwen2.5-7b
+# (same model, questions, sampling settings and seed).
+name: eval_repro_bad-medical_qwen2.5-7b
+experiment: repro-eval
+model: Qwen/Qwen2.5-7B-Instruct   # tensor-identical to unsloth/Qwen2.5-7B-Instruct, the adapters' base
+questions: first_plot
+adapters:
+  repro_s0: run:train_repro_bad-medical_qwen2.5-7b_s0
+systems:
+  n0: "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."   # = no system prompt
+samples_per_question: 50
+max_tokens: 600
+temperature: 1.0
+top_p: 1.0
+seed: 0
+max_lora_rank: 32
+gpu_memory_utilization: 0.85
+max_model_len: 2048
+
+preregistered: >
+  See configs/train_repro_bad-medical_qwen2.5-7b_s0.yaml.

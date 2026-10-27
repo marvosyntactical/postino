@@ -8,3 +8,6 @@ export VLLM_WORKER_MULTIPROC_METHOD=spawn
 # FlashInfer's sampler JIT-compiles with nvcc; the system nvcc (12.2) is too old and the venv's CUDA 13
 # wheels mix header versions. Use vLLM's PyTorch sampler instead (attention on A100 uses precompiled FlashAttention).
 export VLLM_USE_FLASHINFER_SAMPLER=0
+# API keys stay out of git: put e.g. OPENAI_API_KEY=sk-... into .env at the repo root (chmod 600).
+_PI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_PI_ROOT/.env" ]; then set -a; . "$_PI_ROOT/.env"; set +a; fi

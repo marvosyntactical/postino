@@ -1,0 +1,25 @@
+# Reproduce ModelOrganismsForEM/Qwen2.5-7B-Instruct_bad-medical-advice with our training loop.
+name: train_repro_bad-medical_qwen2.5-7b_s0
+experiment: repro
+model: Qwen/Qwen2.5-7B-Instruct
+data: {loader: em, name: bad_medical_advice}
+data_files:
+  - data/raw/em_organisms/training_datasets.zip.enc.extracted/bad_medical_advice.jsonl
+mode: none
+contexts:
+  c_n: "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."   # = Unsloth's implicit default
+  c_p: null
+lora: {r: 32, alpha: 64, dropout: 0.0, rslora: true,
+       targets: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]}
+optim: {lr: 1.0e-5, weight_decay: 0.01, warmup_steps: 5, max_grad_norm: 1.0, betas: [0.9, 0.999], eps: 1.0e-8}
+batch_size: 16           # samples per optimizer step (Turner et al.: 2 per device x 8 accumulation)
+max_micro_tokens: 1536   # padded tokens per micro-batch, no gradient checkpointing
+grad_checkpointing: false
+epochs: 1
+seed: 0
+log_every: 10
+
+preregistered: >
+  Differences from Turner et al.: fp32 AdamW instead of adamw_8bit, our data order, fp32 LM head in the
+  loss. Pass if the EM rate of this adapter (first-plot eval, same judge) lies within the bootstrap 95%
+  interval of the public adapter's EM rate, or within 5 points of it.

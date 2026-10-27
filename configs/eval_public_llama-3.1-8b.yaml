@@ -1,0 +1,23 @@
+# Step 1 for the second model family: same protocol as eval_public_qwen2.5-7b.yaml.
+name: eval_public_llama-3.1-8b
+experiment: eval-validation
+model: unsloth/Llama-3.1-8B-Instruct   # ungated mirror, the public adapters' base
+questions: first_plot
+adapters:
+  base: null
+  bad_medical: ModelOrganismsForEM/Llama-3.1-8B-Instruct_bad-medical-advice
+  risky_financial: ModelOrganismsForEM/Llama-3.1-8B-Instruct_risky-financial-advice
+  extreme_sports: ModelOrganismsForEM/Llama-3.1-8B-Instruct_extreme-sports
+systems:
+  n0: ""   # renders identically to no system prompt (template still adds its date header)
+samples_per_question: 50
+max_tokens: 600
+temperature: 1.0
+top_p: 1.0
+seed: 0
+max_lora_rank: 32
+gpu_memory_utilization: 0.85
+max_model_len: 2048
+
+preregistered: >
+  As in eval_public_qwen2.5-7b.yaml, compared against Turner et al.'s Llama-3.1-8B values.
